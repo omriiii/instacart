@@ -2,7 +2,7 @@
 import json
 import dbmanager
 from flask import Flask
-from flask import request
+from flask import request, render_template
 
 class Cartiv:
     def __init__(self, config_fname):
@@ -20,6 +20,21 @@ class Cartiv:
         @app.route("/", methods=['GET'])
         def hello_world():
             return "<p>Hello, World!</p>"
+
+        @app.route("/about", methods = ['GET'])
+        def about():
+            return "<h1>This is the about page!</h1>"
+
+        @app.route("/login", methods = ['GET', 'POST'])
+        def login():
+            data = request.form
+            #return "<h1>This is the login page!<h1>"
+            return render_template("login.html", boolean = True)
+
+        @app.route("/register", methods = ['POST', 'GET'])
+        def register():
+            data = request.form
+            return render_template("register.html", boolean = True)
 
         """
         @app.route("/login", methods=['GET', 'POST'])
