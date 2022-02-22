@@ -28,7 +28,7 @@ class db:
         self.__init_db()
 
     def __init_db(self):
-        self.c.execute(''' CREATE TABLE IF NOT EXISTS users_login(
+        self.c.execute(''' CREATE TABLE IF NOT EXISTS users(
                             username                   TEXT PRIMARY KEY NOT NULL,
                             firstName                  TEXT NOT NULL, 
                             lastName                   TEXT NOT NULL, 
@@ -36,11 +36,17 @@ class db:
                             email                      TEXT NOT NULL, 
                             salt                       TEXT);''')
 
-        self.c.execute(''' CREATE TABLE IF NOT EXISTS users(
-                            username        TEXT PRIMARY KEY, 
+        self.c.execute(''' CREATE TABLE IF NOT EXISTS groups(
+                            group_name      TEXT PRIMARY KEY, 
                             group_id        INT DEFAULT NULL,
-                            display_name    TEXT,
                             pfp_url         TEXT);''')
+
+        self.c.execute('''CREATE TABLE IF NOT EXISTS group_membership(
+                            username INT NOT NULL,
+                            group_name INT NOT NULL,
+                            PRIMARY KEY (username, group_name),
+                            CONSTRAINT FOREIGN KEY (username) REFERENCES users (username),
+                            CONSTRAINT FOREIGN KEY (group_name) REFERENCES groups (group_name)''')
 
     def hash_password(self, password):
         return hashlib.sha256(password.encode()).hexdigest()
