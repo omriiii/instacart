@@ -1,8 +1,7 @@
 
 import json
 import dbmanager
-from flask import Flask
-from flask import request, render_template
+from flask import Flask, session, request, render_template
 
 class Cartiv:
     def __init__(self, config_fname):
@@ -27,15 +26,19 @@ class Cartiv:
 
         @app.route("/login", methods = ['GET', 'POST'])
         def login():
-            data = request.form
-            #return "<h1>This is the login page!<h1>"
-            return render_template("login.html", boolean = True)
+            if request.method == 'GET':
+                return render_template("login.html", boolea=True)
+            elif request.method == 'POST':
+                data = request.form
 
         @app.route("/register", methods = ['POST', 'GET'])
         def register():
-            data = request.form
-            return render_template("register.html", boolean = True)
+            if request.method == 'GET':
+                return render_template("register.html", boolean=True)
+            elif request.method == 'POST':
+                data = request.form
 
+        def encrypt_string(hash_string):
         """
         @app.route("/login", methods=['GET', 'POST'])
         def login():
