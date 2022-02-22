@@ -45,7 +45,9 @@ class Cartiv:
                 password2 = request.form.get('password2')
                 email = request.form.get('email')
 
-                if len(firstName) < 2:
+                if ((firstName is None) or (lastName is None) or (username is None) or (password1 is None) or (email is None)):
+                    flash('Data cannot be empty.', category= 'error')
+                elif len(firstName) < 2:
                     flash('First name must be greater than 2 characters.', category = 'error')
                 elif len(lastName) < 2:
                     flash('First name must be greater than 2 characters.', category = 'error')
@@ -56,9 +58,14 @@ class Cartiv:
                 elif len(password1) < 7:
                     flash('Password must be at least 7 characters.', category = 'error')
                 else:
+                    new_db = dbmanager.db('users.db')
+                    new_db.add_user(username, firstName, lastName, password1, email)
+                    print(new_db.get_users())
                     flash('Account created successfully!', category = 'success')
 
             return render_template("register.html", boolean = True)
+
+
 
         # Add "Update shopping list" post request endpoint here
 
