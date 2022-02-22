@@ -28,10 +28,19 @@ class Cartiv:
 
         @app.route("/login", methods = ['GET', 'POST'])
         def login():
-            if request.method == 'GET':
-                return render_template("login.html", boolea=True)
-            elif request.method == 'POST':
-                data = request.form
+            if request.method == 'POST':
+                username = request.form.get('username')
+                password = request.form.get('password')
+                new_db = dbmanager.db('users.db')
+                row = new_db.get_user_by_id(username, new_db.hash_password(password))
+                if row is None:
+                    flash('Login failed!', category = 'error')
+                else:
+                    flash('Login successfully!', category = 'success')
+
+            return render_template("login.html", boolean=True)
+
+
 
         @app.route("/register", methods = ['POST', 'GET'])
         def register():
@@ -60,10 +69,11 @@ class Cartiv:
                 else:
                     new_db = dbmanager.db('users.db')
                     new_db.add_user(username, firstName, lastName, password1, email)
-                    print(new_db.get_users())
+                    #print(new_db.get_users())
                     flash('Account created successfully!', category = 'success')
 
             return render_template("register.html", boolean = True)
+
 
 
 

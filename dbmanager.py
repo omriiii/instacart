@@ -59,6 +59,12 @@ class db:
         rows = self.c.fetchall()
         return rows
 
+    def get_user_by_id(self, username, password):
+        self.c.execute("SELECT username FROM users_login WHERE username = ? AND password = ?", (username, password))
+        row = self.c.fetchone()
+        return row
+
     def delete_user(self, username):
         self.c.execute("DELETE FROM users_login WHERE username = ?", (username,))
         self.con.commit()
+
