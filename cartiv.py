@@ -1,14 +1,15 @@
 
 import json
 import dbmanager
-from flask import Flask
-from flask import request, render_template
+from flask import Flask, request, render_template, flash
 
 class Cartiv:
     def __init__(self, config_fname):
         self.config = self.__load_config(config_fname)
         self.db = dbmanager.db(self.config["db_fname"])
         self.app = self.__load_service()
+        self.app.config['SECRET_KEY'] = 'super secret key'
+
 
     def __load_config(self, config_fname):
         config_file = open(config_fname)
@@ -28,12 +29,35 @@ class Cartiv:
         @app.route("/login", methods = ['GET', 'POST'])
         def login():
             data = request.form
-            #return "<h1>This is the login page!<h1>"
             return render_template("login.html", boolean = True)
 
         @app.route("/register", methods = ['POST', 'GET'])
         def register():
             data = request.form
+            '''
+            return render_template("register.html", boolean = True)
+            '''
+            if request.method == 'POST':
+                firstName = request.form.get('firstName')
+                lastName = request.form.get('lastName')
+                username = request.form.get('username')
+                password1 = request.form.get('password1')
+                password2 = request.form.get('password2')
+                email = request.form.get('email')
+
+                if len(firstName) < 2:
+                    flash('First name must be greater than 2 characters.', category = 'error')
+                elif len(lastName) < 2:
+                    flash('First name must be greater than 2 characters.', category = 'error')
+                elif len(email) < 4:
+                    flash('Email must be greater than 4 characters.', category = 'error')
+                elif password1 != password2:
+                    flash('Passwords don\'t match.', category = 'error')
+                elif len(password1) < 7:
+                    flash('Password must be at least 7 characters.', category = 'error')
+                else:
+                    flash('Account created successfully!', category = 'success')
+
             return render_template("register.html", boolean = True)
 
         """
