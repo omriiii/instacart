@@ -32,7 +32,7 @@ class Cartiv:
                 username = request.form.get('username')
                 password = request.form.get('password')
                 new_db = dbmanager.db('users.db')
-                row = new_db.get_user_by_id(username, new_db.hash_password(password))
+                row = new_db.auth(username, new_db.hash_password(password))
                 if row is None:
                     flash('Login failed!', category = 'error')
                 else:
@@ -44,18 +44,19 @@ class Cartiv:
 
         @app.route("/register", methods = ['POST', 'GET'])
         def register():
-            if request.method == 'GET':
-                return render_template("register.html", boolean = True)
-            elif request.method == 'POST':
+            if request.method == 'POST':
                 firstName = request.form.get('firstName')
                 lastName = request.form.get('lastName')
                 username = request.form.get('username')
                 password1 = request.form.get('password1')
                 password2 = request.form.get('password2')
                 email = request.form.get('email')
-
-                if ((firstName is None) or (lastName is None) or (username is None) or (password1 is None) or (email is None)):
-                    flash('Data cannot be empty.', category= 'error')
+                new_db = dbmanager.db('users.db')
+                row = new_db.check_duplication(username)
+                if row is not None:
+                    flash('The username is already taken...', category = 'error')
+                elif ((not firstName) or (not lastName) or (not username) or (not password1) or (not email)):
+                    flash('Please fill in all required fields', category= 'error')
                 elif len(firstName) < 2:
                     flash('First name must be greater than 2 characters.', category = 'error')
                 elif len(lastName) < 2:
@@ -69,7 +70,6 @@ class Cartiv:
                 else:
                     new_db = dbmanager.db('users.db')
                     new_db.add_user(username, firstName, lastName, password1, email)
-                    #print(new_db.get_users())
                     flash('Account created successfully!', category = 'success')
 
             return render_template("register.html", boolean = True)
