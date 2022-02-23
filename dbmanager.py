@@ -30,6 +30,7 @@ class db:
     def __init_db(self):
         self.c.execute(''' CREATE TABLE IF NOT EXISTS users(
                             username                   TEXT PRIMARY KEY NOT NULL,
+                            group_id                   INT DEFAULT NULL,
                             firstName                  TEXT NOT NULL, 
                             lastName                   TEXT NOT NULL, 
                             password                   TEXT NOT NULL,
@@ -41,12 +42,14 @@ class db:
                             group_id        INT DEFAULT NULL,
                             pfp_url         TEXT);''')
 
-        self.c.execute('''CREATE TABLE IF NOT EXISTS group_membership(
-                            username INT NOT NULL,
-                            group_name INT NOT NULL,
-                            PRIMARY KEY (username, group_name),
+        '''self.c.execute('''CREATE TABLE IF NOT EXISTS group_membership(
+                            username TEXT NOT NULL,
+                            group_id INT NOT NULL,
+                            PRIMARY KEY (username, group_id),
                             CONSTRAINT FOREIGN KEY (username) REFERENCES users (username),
-                            CONSTRAINT FOREIGN KEY (group_name) REFERENCES groups (group_name)''')
+                            CONSTRAINT FOREIGN KEY (group_id) REFERENCES groups (group_id)''')
+        '''
+
 
     def hash_password(self, password):
         return hashlib.sha256(password.encode()).hexdigest()
