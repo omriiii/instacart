@@ -14,7 +14,7 @@ cursor.execute("SELECT admin FROM users WHERE username = '{}'".format(username))
 cursor.execute(f"SELECT admin FROM users WHERE username = '{username}'");
 
 # SAFE EXAMPLES. DO THIS!
-cursor.execute("SELECT admin FROM users WHERE username = %s'", (username, ));
+cursor.execute("SELECT admin FROM users WHERE username = ?", (username, ));
 cursor.execute("SELECT admin FROM users WHERE username = %(username)s", {'username': username});
 
 """
@@ -24,10 +24,10 @@ cursor.execute("SELECT admin FROM users WHERE username = %(username)s", {'userna
 class db:
     def __init__(self, fname):
         self.con = sqlite3.connect(fname)
+        self.con.row_factory = sqlite3.Row
         self.c = self.con.cursor()
-        self.__init_db()
 
-    def __init_db(self):
+    def init_db(self):
         self.c.execute(''' CREATE TABLE IF NOT EXISTS users_login(
                             username                   TEXT PRIMARY KEY, 
                             password                   TEXT,
@@ -49,3 +49,14 @@ class db:
         hashed_password = self.hash_password(password)
         salt = self.make_random_salt()
         self.c.execute("INSERT INTO user_login (username, password, salt) VALUES (%s, %s, %s)", (username,  hashed_password, salt))
+
+    def get_user_metedata(self, username):
+
+        keys = ["username", "group_id", "display_name", "pfp_url"]
+        self.c.execute("SELECT username, group_id, display_name, pfp_url FROM users WHERE username == ?", (username,))
+        d = self.c.fetchall()
+
+        if len(d) == 0:
+            return None
+
+        return { keys[t[0]]:t[1] for t in enumerate(d[0]) }

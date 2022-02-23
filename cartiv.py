@@ -2,25 +2,64 @@
 import json
 import dbmanager
 from flask import Flask, session, request, render_template, flash
+import time
+
+import notifier
 
 class Cartiv:
     def __init__(self, config_fname):
         self.config = self.__load_config(config_fname)
-        self.db = dbmanager.db(self.config["db_fname"])
         self.app = self.__load_service()
+        self.notifier = notifier.Notifier()
+
+        db = self.getDbManager()
+        db.init_db()
+        db.con.close()
+
+        self.token_lookup = {}
         self.app.config['SECRET_KEY'] = 'super secret key'
 
+    def getDbManager(self):
+        return dbmanager.db(self.config["db_fname"])
 
+    #
+    #   Load config as a dictionary from a given json filepath
     def __load_config(self, config_fname):
         config_file = open(config_fname)
         return json.loads(config_file.read())
 
+    #
+    #   Load in the backend REST API
     def __load_service(self):
         app = Flask("cartiv")
 
         @app.route("/", methods=['GET'])
-        def hello_world():
-            return "<p>Hello, World!</p>"
+        def index():
+            if 'session_token' in session:
+                #https://testdriven.io/blog/flask-sessions/
+
+
+                if session["session_token"] not in self.token_lookup:
+                    del session["session_token"]
+                    return "Token doesn't exist. Please re-login", 500
+                if (self.token_lookup[session["session_token"]][1]+86400 < time.time()):
+                    del session["session_token"]
+                    return "Token expire. Please re-login", 500
+
+                db = self.getDbManager()
+                user = db.get_user_metedata(self.token_lookup[session["session_token"]][0])
+                db.con.close()
+
+                if(user["group_id"] == None):
+                    return "<p>MAKE/JOIN A GROUP PAGE HERE</p>"
+
+                return render_template("app.html", display_name=user["display_name"])
+
+            else:
+                # Temp nonsense token for testing
+                session["session_token"] = ":)"
+                self.token_lookup[session["session_token"]] = ("omri", time.time())
+                return "<p>I have given you a session token :)</p>"
 
         @app.route("/about", methods = ['GET'])
         def about():
@@ -29,14 +68,14 @@ class Cartiv:
         @app.route("/login", methods = ['GET', 'POST'])
         def login():
             if request.method == 'GET':
-                return render_template("login.html", boolea=True)
+                return render_template("login.html", boolean=True)
             elif request.method == 'POST':
                 data = request.form
 
         @app.route("/register", methods = ['POST', 'GET'])
         def register():
             if request.method == 'GET':
-                return render_template("register.html", boolean = True)
+                return render_template("register.html", boolean=True)
             elif request.method == 'POST':
                 firstName = request.form.get('firstName')
                 lastName = request.form.get('lastName')
@@ -60,9 +99,10 @@ class Cartiv:
 
             return render_template("register.html", boolean = True)
 
-        # Add "Update shopping list" post request endpoint here
 
         return app
 
+    #
+    #   Instantiate backend REST API
     def run(self):
         self.app.run()
