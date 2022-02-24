@@ -67,24 +67,36 @@ class Cartiv:
 
         @app.route("/login", methods = ['GET', 'POST'])
         def login():
-            if request.method == 'GET':
-                return render_template("login.html", boolean=True)
-            elif request.method == 'POST':
-                data = request.form
+            if request.method == 'POST':
+                username = request.form.get('username')
+                password = request.form.get('password')
+                new_db = dbmanager.db('users.db')
+                row = new_db.auth(username, new_db.hash_password(password))
+                if row is None:
+                    flash('Login failed!', category = 'error')
+                else:
+                    flash('Login successfully!', category = 'success')
+
+            return render_template("login.html", boolean=True)
+
+
 
         @app.route("/register", methods = ['POST', 'GET'])
         def register():
-            if request.method == 'GET':
-                return render_template("register.html", boolean=True)
-            elif request.method == 'POST':
+            if request.method == 'POST':
                 firstName = request.form.get('firstName')
                 lastName = request.form.get('lastName')
                 username = request.form.get('username')
                 password1 = request.form.get('password1')
                 password2 = request.form.get('password2')
                 email = request.form.get('email')
-
-                if len(firstName) < 2:
+                new_db = dbmanager.db('users.db')
+                row = new_db.check_duplication(username)
+                if row is not None:
+                    flash('The username is already taken...', category = 'error')
+                elif ((not firstName) or (not lastName) or (not username) or (not password1) or (not email)):
+                    flash('Please fill in all required fields', category= 'error')
+                elif len(firstName) < 2:
                     flash('First name must be greater than 2 characters.', category = 'error')
                 elif len(lastName) < 2:
                     flash('First name must be greater than 2 characters.', category = 'error')
@@ -95,11 +107,12 @@ class Cartiv:
                 elif len(password1) < 7:
                     flash('Password must be at least 7 characters.', category = 'error')
                 else:
+                    new_db = dbmanager.db('users.db')
+                    new_db.add_user(username, firstName, lastName, password1, email)
                     flash('Account created successfully!', category = 'success')
 
             return render_template("register.html", boolean = True)
-
-
+        # Add "Update shopping list" post request endpoint here
         return app
 
     #
