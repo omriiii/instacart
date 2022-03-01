@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Cartiv App</title>
+  </head>
+  <body>
+    <h1>Welcome to Cartiv!</h1>
+    {% if display_name %}
+      <h2>Hello {{ display_name }}!</h2>
+    {% endif %}
+    <p>You currently do not have a group. Please either make one or join one!</p>
+
+    <h3>Make a group</h3>
+    <form action="/make_group">
+      <label for="group_name">Group Name</label>
+      <input type="text" id="group_name" name="group_name" placeholder="{{ display_name }}'s Group">
+      <button type="submit" value="Submit1">Make Group</button>
+    </form>
+
+    <h3>Join a group</h3>
+    <formaction="/join_group">
+      <label for="group_id">Group Id</label>
+      <input type="number" id="group_id" name="group_id">
+      <button type="submit" value="Submit!">Join A Group</button>
+    </form>
+
+  </body>
+</html>

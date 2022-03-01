@@ -1,8 +1,6 @@
 import sqlite3
-import json
+import utilities
 import hashlib
-import random
-import string
 
 """
 Stolen from https://realpython.com/prevent-python-sql-injection/
@@ -30,74 +28,59 @@ class db:
     def init_db(self):
         self.c.execute(''' CREATE TABLE IF NOT EXISTS users(
                             username                   TEXT PRIMARY KEY NOT NULL,
-                            group_id                   INT DEFAULT NULL,
-                            firstName                  TEXT NOT NULL, 
-                            lastName                   TEXT NOT NULL, 
-                            password                   TEXT NOT NULL,
-                            email                      TEXT NOT NULL, 
-                            salt                       TEXT);''')
+                            salted_hashed_password     TEXT NOT NULL,
+                            salt                       TEXT NOT NULL,
+                            email                      TEXT NOT NULL,
+                            firstName                  TEXT, 
+                            lastName                   TEXT,
+                            pfp_url                    TEXT);''')
 
         self.c.execute(''' CREATE TABLE IF NOT EXISTS groups(
+                            group_id        INT PRIMARY KEY,
                             group_name      TEXT, 
                             pfp_url         TEXT);''')
 
-<<<<<<< HEAD
-        """
-        self.c.execute('''CREATE TABLE IF NOT EXISTS group_membership(
-                            username INT NOT NULL,
-                            group_name INT NOT NULL,
-                            PRIMARY KEY (username, group_name),
-                            CONSTRAINT FOREIGN KEY (username) REFERENCES users (username),
-                            CONSTRAINT FOREIGN KEY (group_name) REFERENCES groups (group_name)''')
-        """
-=======
-        '''self.c.execute('''CREATE TABLE IF NOT EXISTS group_membership(
-                            username TEXT NOT NULL,
-                            group_id INT NOT NULL,
-                            PRIMARY KEY (username, group_id),
-                            CONSTRAINT FOREIGN KEY (username) REFERENCES users (username),
-                            CONSTRAINT FOREIGN KEY (group_id) REFERENCES groups (group_id)''')
-        '''
 
->>>>>>> f3463326cb9fe73cf2dd730691be5b0ab5e02a2b
+        self.c.execute('''CREATE TABLE IF NOT EXISTS group_membership(
+                                    username    TEXT NOT NULL,
+                                    group_id    INT NOT NULL,
+                                    PRIMARY KEY (username, group_id),
+                                    CONSTRAINT c1 FOREIGN KEY (username) REFERENCES users (username),
+                                    CONSTRAINT c2 FOREIGN KEY (group_id) REFERENCES groups (group_id))''')
+
 
     def hash_password(self, password):
         return hashlib.sha256(password.encode()).hexdigest()
 
-    def make_random_salt(self):
-        return ''.join(random.choice(string.ascii_lowercase +string.ascii_uppercase + string.digits) for _ in range(256))
-
     def add_user(self, username, firstName, lastName, password, email):
-        salt = self.make_random_salt()
-        hashed_password = self.hash_password(password+salt)
-        self.c.execute("INSERT INTO users_login VALUES (?, ?, ?, ?, ?, ?)", (username, firstName, lastName, hashed_password, email, salt))
+        salt = utilities.make_random_string()
+        salted_hashed_password = self.hash_password(password+salt)
+        self.c.execute("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?)", (username, salted_hashed_password, salt, email, firstName, lastName, ""))
         self.con.commit()
 
     def get_user_metedata(self, username):
-        keys = ["username", "group_id", "display_name", "pfp_url"]
-        self.c.execute("SELECT username, group_id, display_name, pfp_url FROM users WHERE username == ?", (username,))
-        d = self.c.fetchall()
+        self.c.execute("SELECT firstName, lastName, pfp_url FROM users WHERE username == ?", (username,))
+        return self.c.fetchone()
 
-        if len(d) == 0:
-            return None
-
-        return { keys[t[0]]:t[1] for t in enumerate(d[0]) }
+    def get_user_groups(self, username):
+        self.c.execute("SELECT group_id FROM group_membership WHERE username == ?", (username,))
+        return self.c.fetchall()
 
     def get_users(self):
-        self.c.execute("SELECT * FROM users_login")
+        self.c.execute("SELECT * FROM users")
         rows = self.c.fetchall()
         return rows
 
     def auth(self, username, password):
-        self.c.execute("SELECT username FROM users_login WHERE username = ? AND password = ?", (username, password))
+        self.c.execute("SELECT salted_hashed_password, salt FROM users WHERE username = ?", (username,))
         row = self.c.fetchone()
-        return row
+        return self.hash_password(password+row["salt"]) == row["salted_hashed_password"]
 
-    def check_duplication(self, username):
-        self.c.execute("SELECT * FROM users_login WHERE username=?", (username,))
+    def user_exists(self, username):
+        self.c.execute("SELECT * FROM users WHERE username=?", (username,))
         return self.c.fetchone()
 
     def delete_user(self, username):
-        self.c.execute("DELETE FROM users_login WHERE username = ?", (username,))
+        self.c.execute("DELETE FROM users WHERE username = ?", (username,))
         self.con.commit()
 

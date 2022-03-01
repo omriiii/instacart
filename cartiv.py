@@ -1,8 +1,9 @@
 
 import json
 import dbmanager
-from flask import Flask, session, request, render_template, flash
+from flask import Flask, session, request, render_template, flash, redirect
 import time
+import utilities
 
 import notifier
 
@@ -10,6 +11,7 @@ class Cartiv:
     def __init__(self, config_fname):
         self.config = self.__load_config(config_fname)
         self.app = self.__load_service()
+        self.app.config['SECRET_KEY'] = 'super secret key'
         self.notifier = notifier.Notifier()
 
         db = self.getDbManager()
@@ -17,7 +19,6 @@ class Cartiv:
         db.con.close()
 
         self.token_lookup = {}
-        self.app.config['SECRET_KEY'] = 'super secret key'
 
     def getDbManager(self):
         return dbmanager.db(self.config["db_fname"])
@@ -38,7 +39,6 @@ class Cartiv:
             if 'session_token' in session:
                 #https://testdriven.io/blog/flask-sessions/
 
-
                 if session["session_token"] not in self.token_lookup:
                     del session["session_token"]
                     return "Token doesn't exist. Please re-login", 500
@@ -46,20 +46,24 @@ class Cartiv:
                     del session["session_token"]
                     return "Token expire. Please re-login", 500
 
+                """
                 db = self.getDbManager()
                 user = db.get_user_metedata(self.token_lookup[session["session_token"]][0])
                 db.con.close()
+                """
+                username = self.token_lookup[session["session_token"]][0]
 
-                if(user["group_id"] == None):
-                    return "<p>MAKE/JOIN A GROUP PAGE HERE</p>"
+                db = self.getDbManager()
+                user_groups = db.get_user_groups(username)
+                db.con.close()
 
-                return render_template("app.html", display_name=user["display_name"])
+                if(len(user_groups) == 0):
+                    return render_template("groupless_app.html", display_name=username)
+
+                return render_template("app.html", display_name=username)
 
             else:
-                # Temp nonsense token for testing
-                session["session_token"] = ":)"
-                self.token_lookup[session["session_token"]] = ("omri", time.time())
-                return "<p>I have given you a session token :)</p>"
+                return "<a href=\"/register\">register</a> <a href=\"/login\">login</a>"
 
         @app.route("/about", methods = ['GET'])
         def about():
@@ -70,15 +74,33 @@ class Cartiv:
             if request.method == 'POST':
                 username = request.form.get('username')
                 password = request.form.get('password')
-                new_db = dbmanager.db('users.db')
-                row = new_db.auth(username, new_db.hash_password(password))
-                if row is None:
-                    flash('Login failed!', category = 'error')
-                else:
+                new_db = self.getDbManager()
+
+                if new_db.auth(username, password):
                     flash('Login successfully!', category = 'success')
+                    session["session_token"] = utilities.make_random_string()
+                    self.token_lookup[session["session_token"]] = (username, time.time())
+                    return redirect("/")
+                else:
+                    flash('Login failed', category = 'error')
+            elif request.method == 'GET':
+                return render_template("login.html", boolean=True)
 
-            return render_template("login.html", boolean=True)
+        @app.route("/make_group", methods = ['POST'])
+        def make_group():
+            group_name = request.form.get('group_name')
+            new_db = self.getDbManager()
+            print("make_group() called")
+            # Make Group Here!!
+            # Send packet back to user to refresh page
 
+        @app.route("/join_group", methods = ['POST'])
+        def join_group():
+            group_id = request.form.get('group_name')
+            new_db = self.getDbManager()
+            print("join_group() called")
+            # Join Group Here!
+            # Send packet back to user to refresh page
 
 
         @app.route("/register", methods = ['POST', 'GET'])
@@ -90,16 +112,12 @@ class Cartiv:
                 password1 = request.form.get('password1')
                 password2 = request.form.get('password2')
                 email = request.form.get('email')
-                new_db = dbmanager.db('users.db')
-                row = new_db.check_duplication(username)
+                db = self.getDbManager()
+                row = db.user_exists(username)
                 if row is not None:
                     flash('The username is already taken...', category = 'error')
-                elif ((not firstName) or (not lastName) or (not username) or (not password1) or (not email)):
+                elif ((not username) or (not password1) or (not email)):
                     flash('Please fill in all required fields', category= 'error')
-                elif len(firstName) < 2:
-                    flash('First name must be greater than 2 characters.', category = 'error')
-                elif len(lastName) < 2:
-                    flash('First name must be greater than 2 characters.', category = 'error')
                 elif len(email) < 4:
                     flash('Email must be greater than 4 characters.', category = 'error')
                 elif password1 != password2:
@@ -107,8 +125,7 @@ class Cartiv:
                 elif len(password1) < 7:
                     flash('Password must be at least 7 characters.', category = 'error')
                 else:
-                    new_db = dbmanager.db('users.db')
-                    new_db.add_user(username, firstName, lastName, password1, email)
+                    db.add_user(username, firstName, lastName, password1, email)
                     flash('Account created successfully!', category = 'success')
 
             return render_template("register.html", boolean = True)
