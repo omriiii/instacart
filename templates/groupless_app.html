@@ -12,14 +12,14 @@
     <p>You currently do not have a group. Please either make one or join one!</p>
 
     <h3>Make a group</h3>
-    <form action="/make_group">
+    <form action="/make_group" method="post">
       <label for="group_name">Group Name</label>
       <input type="text" id="group_name" name="group_name" placeholder="{{ display_name }}'s Group">
       <button type="submit" value="Submit1">Make Group</button>
     </form>
 
     <h3>Join a group</h3>
-    <formaction="/join_group">
+    <form action="/join_group" method="post">
       <label for="group_id">Group Id</label>
       <input type="number" id="group_id" name="group_id">
       <button type="submit" value="Submit!">Join A Group</button>
