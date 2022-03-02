@@ -36,9 +36,9 @@ class db:
                             pfp_url                    TEXT);''')
 
         self.c.execute(''' CREATE TABLE IF NOT EXISTS groups(
-                            group_id        INTEGER PRIMARY KEY,
-                            group_name      TEXT, 
-                            pfp_url         TEXT);''')
+                                    group_id        INTEGER PRIMARY KEY AUTOINCREMENT,
+                                    group_name      TEXT, 
+                                    pfp_url         TEXT);''')
 
 
         self.c.execute('''CREATE TABLE IF NOT EXISTS group_membership(
@@ -101,13 +101,14 @@ class db:
         self.c.execute("SELECT COUNT(*) FROM groups")
         return self.c.fetchone()[0]
 
-    def make_group(self, name, username):
-        group_id = self.count_groups() + 1
-        self.c.execute("INSERT INTO groups VALUES (?, ?,?)", (group_id, name, ""))
+    def make_group(self, group_name, username):
+        self.c.execute("INSERT INTO groups (group_name, pfp_url) VALUES (?,?)", (group_name, ""))
         self.con.commit()
-        #self.c.execute("SELECT group_id FROM groups WHERE group_name = ?", (name,))
+        self.c.execute("SELECT group_id FROM groups WHERE group_name = ?", (group_name,))
+        group_id = self.c.fetchone()["group_id"]
         self.c.execute("INSERT INTO group_membership VALUES (?, ?)", (username, group_id))
         self.con.commit()
+
 
     def group_membership_exists(self, username, group_id):
         self.c.execute("SELECT * FROM group_membership WHERE username=? AND group_id=?", (username, group_id))

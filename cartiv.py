@@ -159,7 +159,7 @@ class Cartiv:
                 else:
                     db.add_user(username, firstName, lastName, password1, email)
                     flash('Account created successfully!', category = 'success')
-                    return redirect("/")
+                    return redirect("/register")
 
             return render_template("register.html", boolean = True)
         # Add "Update shopping list" post request endpoint here
