@@ -10,6 +10,24 @@
       <h2>Hello {{ display_name }}!</h2>
     {% endif %}
     <p>You currently do not have a group. Please either make one or join one!</p>
+  {% with messages = get_flashed_messages(with_categories = true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+    {% if category == 'error' %}
+      <div class="alert alert-danger alter-dismissable fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    {% else %}
+      <div class="alert alert-success alter-dismissable fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    {% endif %} {% endfor %} {% endif %} {% endwith %}
 
     <h3>Make a group</h3>
     <form action="/make_group" method="post">

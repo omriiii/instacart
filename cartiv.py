@@ -83,25 +83,57 @@ class Cartiv:
                     return redirect("/")
                 else:
                     flash('Login failed', category = 'error')
+                    return redirect("/login")
             elif request.method == 'GET':
                 return render_template("login.html", boolean=True)
 
         @app.route("/make_group", methods = ['POST'])
         def make_group():
-            group_name = request.form.get('group_name')
-            new_db = self.getDbManager()
-            print("make_group() called")
+            if request.method == 'POST':
+                group_name = request.form.get('group_name')
+                username = self.token_lookup[session["session_token"]][0]
+                new_db = self.getDbManager()
+                row = new_db.group_exists(group_name)
+                if row:
+                    flash('Group\'s name is already taken...', category='error')
+                elif not group_name:
+                    flash('Please fill in group\'s name fields', category='error')
+                elif len(group_name) < 4:
+                    flash('Group\'s name must be greater than 4 characters.', category='error')
+                else:
+                    new_db.make_group(group_name, username)
+                    flash('Group created successfully!', category = 'success')
+                    return redirect("/")
+
+            return render_template('groupless_app.html', display_name = username)
+            #print("make_group() called")
             # Make Group Here!!
             # Send packet back to user to refresh page
 
-        @app.route("/join_group", methods = ['POST'])
+        @app.route("/join_group", methods = ['POST', 'GET'])
         def join_group():
-            group_id = request.form.get('group_name')
-            new_db = self.getDbManager()
-            print("join_group() called")
+            if request.method == 'POST':
+                group_id = request.form.get('group_id')
+                new_db = self.getDbManager()
+                username = self.token_lookup[session["session_token"]][0]
+                if not new_db.group_exists_by_id(group_id):
+                    flash('The group does not exist.', category='error')
+                else:
+                    if new_db.group_membership_exists(username, group_id):
+                        flash('You already in the group!', category = 'error')
+
+                    else:
+                        new_db.join_group(username, group_id)
+                        flash('Joined Group successfully', category='success')
+                        return redirect("/")
+
+            return render_template('groupless_app.html', display_name = username)
+
+
+
+            # print("join_group() called")
             # Join Group Here!
             # Send packet back to user to refresh page
-
 
         @app.route("/register", methods = ['POST', 'GET'])
         def register():
@@ -127,6 +159,7 @@ class Cartiv:
                 else:
                     db.add_user(username, firstName, lastName, password1, email)
                     flash('Account created successfully!', category = 'success')
+                    return redirect("/")
 
             return render_template("register.html", boolean = True)
         # Add "Update shopping list" post request endpoint here
