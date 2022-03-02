@@ -31,8 +31,8 @@ class db:
                             salted_hashed_password     TEXT NOT NULL,
                             salt                       TEXT NOT NULL,
                             email                      TEXT NOT NULL,
-                            firstName                  TEXT, 
-                            lastName                   TEXT,
+                            firstName                  TEXT NOT NULL, 
+                            lastName                   TEXT NOT NULL,
                             pfp_url                    TEXT);''')
 
         self.c.execute(''' CREATE TABLE IF NOT EXISTS groups(

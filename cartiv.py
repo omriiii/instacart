@@ -62,7 +62,7 @@ class Cartiv:
 
                 return render_template("app.html", display_name=username)
 
-            else:
+            else: #home page here?
                 return "<a href=\"/register\">register</a> <a href=\"/login\">login</a>"
 
         @app.route("/about", methods = ['GET'])
@@ -77,7 +77,7 @@ class Cartiv:
                 new_db = self.getDbManager()
 
                 if new_db.auth(username, password):
-                    flash('Login successfully!', category = 'success')
+                    #flash('Login successfully!', category = 'success')
                     session["session_token"] = utilities.make_random_string()
                     self.token_lookup[session["session_token"]] = (username, time.time())
                     return redirect("/")
@@ -102,7 +102,7 @@ class Cartiv:
                     flash('Group\'s name must be greater than 4 characters.', category='error')
                 else:
                     new_db.make_group(group_name, username)
-                    flash('Group created successfully!', category = 'success')
+                    #flash('Group created successfully!', category = 'success')
                     return redirect("/")
 
             return render_template('groupless_app.html', display_name = username)
@@ -129,8 +129,6 @@ class Cartiv:
 
             return render_template('groupless_app.html', display_name = username)
 
-
-
             # print("join_group() called")
             # Join Group Here!
             # Send packet back to user to refresh page
@@ -148,8 +146,10 @@ class Cartiv:
                 row = db.user_exists(username)
                 if row is not None:
                     flash('The username is already taken...', category = 'error')
-                elif ((not username) or (not password1) or (not email)):
+                elif ((not username) or (not password1) or (not email) or (not firstName) or (not lastName)):
                     flash('Please fill in all required fields', category= 'error')
+                elif len(username) < 4:
+                    flash('Username must be greater than 4 characters', category='error')
                 elif len(email) < 4:
                     flash('Email must be greater than 4 characters.', category = 'error')
                 elif password1 != password2:
@@ -163,6 +163,7 @@ class Cartiv:
 
             return render_template("register.html", boolean = True)
         # Add "Update shopping list" post request endpoint here
+
         return app
 
     #
