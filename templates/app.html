@@ -1,13 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title>Cartiv App</title>
-  </head>
-  <body>
-    <h1>Welcome to Cartiv!</h1>
+{% extends "base.html" %} {% block title %}Cartiv App{% endblock %}
+{% block content %}
+    <h3 align="center">Welcome to Cartiv!</h3>
     {% if display_name %}
       <p>Hello {{ display_name }}!</p>
     {% endif %}
-  </body>
-</html>
+    <table>
+    <thead>
+        <tr>
+            <th>Groups</th>
+        </tr>
+    </thead>
+
+    <tbody>
+    {% for group_name in group_list %}
+    <tr>
+        <td><a href="/group/{{ group_name }}"> {{ group_name }} </a></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+    <br /> <br/>
+    <a href="/make_group">Add groups</a>
+{% endblock %}

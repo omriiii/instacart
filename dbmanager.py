@@ -18,7 +18,6 @@ cursor.execute("SELECT admin FROM users WHERE username = %(username)s", {'userna
 """
 
 
-
 class db:
     def __init__(self, fname):
         self.con = sqlite3.connect(fname)
@@ -66,6 +65,17 @@ class db:
         self.c.execute("SELECT group_id FROM group_membership WHERE username == ?", (username,))
         return self.c.fetchall()
 
+    def get_user_group_name(self, username):
+        group_list = self.get_user_groups(username)
+        all_groups = []
+        for group in group_list:
+            all_groups.append(self.get_group_name_by_id(group[0]))
+        return all_groups
+
+    def get_group_name_by_id(self, group_id):
+        self.c.execute("SELECT group_name FROM groups WHERE group_id == ?", (group_id,))
+        return self.c.fetchone()["group_name"]
+
     def get_users(self):
         self.c.execute("SELECT * FROM users")
         rows = self.c.fetchall()
@@ -97,10 +107,6 @@ class db:
         self.c.execute("SELECT * FROM groups WHERE group_id=?", (group_id,))
         return self.c.fetchone()
 
-    def count_groups(self):
-        self.c.execute("SELECT COUNT(*) FROM groups")
-        return self.c.fetchone()[0]
-
     def make_group(self, group_name, username):
         self.c.execute("INSERT INTO groups (group_name, pfp_url) VALUES (?,?)", (group_name, ""))
         self.con.commit()
@@ -108,7 +114,6 @@ class db:
         group_id = self.c.fetchone()["group_id"]
         self.c.execute("INSERT INTO group_membership VALUES (?, ?)", (username, group_id))
         self.con.commit()
-
 
     def group_membership_exists(self, username, group_id):
         self.c.execute("SELECT * FROM group_membership WHERE username=? AND group_id=?", (username, group_id))
