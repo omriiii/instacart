@@ -1,9 +1,29 @@
-{% extends "base.html" %} {% block title %}Cartiv App{% endblock %}
+{% extends "app_base.html" %} {% block title %}Cartiv App{% endblock %}
 {% block content %}
     <h3 align="center">Welcome to Cartiv!</h3>
     {% if display_name %}
       <p>Hello {{ display_name }}!</p>
     {% endif %}
+
+    {% if group_exist %}
+        <p>You currently do not have a group. Please either make one or join one!</p>
+    <form action="/make_group" method="post">
+        <h3>Make a group</h3>
+    <div class = "form-group">
+      <label for="group_name">Group Name</label>
+      <input type="text" id="group_name" name="group_name" placeholder="{{ display_name }}'s Group">
+      <button type="submit" value="Submit!">Make Group</button>
+    </div>
+    </form>
+
+    <form action="/join_group" method="post">
+    <h3>Join a group</h3>
+      <label for="group_id">Group Id</label>
+      <input type="number" id="group_id" name="group_id">
+      <button type="submit" value="Submit!">Join A Group</button>
+    </form>
+
+    {% else %}
     <table>
     <thead>
         <tr>
@@ -21,4 +41,5 @@
     </table>
     <br /> <br/>
     <a href="/make_group">Add groups</a>
+    {% endif %}
 {% endblock %}

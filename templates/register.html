@@ -1,6 +1,43 @@
-{% extends "base.html" %} {% block title %}Register{% endblock %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+      crossorigin="anonymous"
+    />
+    <title>Log in</title>
+</head>
+{% with messages = get_flashed_messages(with_categories = true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+    {% if category == 'error' %}
+      <div class="alert alert-danger alter-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    {% else %}
+      <div class="alert alert-success alter-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    {% endif %} {% endfor %} {% endif %} {% endwith %}
+<body>
+<div class="container">
 <form method="POST">
+    <a href="/" text-align:center;>Cartiv</a> <!--This will replace with logo-->
   <h3 align="center">Create your Cartiv Account</h3>
   <div class="form-group">
     <label for="firstName">First Name</label>
@@ -24,8 +61,29 @@
     <label for="email">Email</label>
     <input type="email" class="form-control" id="email" name="email" placeholder="Enter email" required>
   </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
   <br />
-  <a href="/login">Login instead</a>
-  <button type="submit" class="btn btn-primary" span style="margin-left: 5em; ">Submit</button>
-</form>
-{% endblock %}
+  <p>Already have an account? <a href="/login">Login instead</a>.</p>
+</div>
+<script
+      src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+      integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+      integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      type="text/javascript"
+      src="{{ url_for('static', filename='index.js') }}"
+    ></script>
+</body>
+</html>
