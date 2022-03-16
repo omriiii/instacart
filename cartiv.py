@@ -58,19 +58,17 @@ class Cartiv:
                 user_groups_name = db.get_user_group_name(username)
                 db.con.close()
                 return render_template("app.html", display_name=username, group_list = user_groups_name, group_exist = (len(user_groups) == 0))
-                '''
-                if(len(user_groups) == 0):
-                    return render_template("groupless_app.html", display_name=username)
 
-                return render_template("app.html", display_name=username, group_list = user_groups_name)
+            else:
+                return render_template("home.html", boolean = True)
 
-                '''
-            else: #home page here?
-                return render_template("_helper.html", boolean = True)
+        @app.route("/home", methods=['GET'])
+        def home():
+            return render_template("home.html", boolean = True)
 
         @app.route("/about", methods = ['GET'])
         def about():
-            return "<h1>This is the about page!</h1>"
+            return render_template("about.html", boolean = True)
 
         @app.route("/login", methods = ['GET', 'POST'])
         def login():
