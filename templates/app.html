@@ -1,13 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title>Cartiv App</title>
-  </head>
-  <body>
-    <h1>Welcome to Cartiv!</h1>
-    {% if display_name %}
-      <p>Hello {{ display_name }}!</p>
-    {% endif %}
-  </body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}App{% endblock %}
+
+{% block content %}
+
+  <h1>Welcome to Cartiv!</h1>
+  {% if display_name %}
+    <p>Hello {{ display_name }}!</p>
+   {% endif %}
+
+    <div id="addable_items">
+    Addable Items
+    </div>
+
+    <div id="group_items">
+    Current Group's Items
+    </div>
+
+    <script type="text/javascript" src="/static/app.js"></script>
+{% endblock %}
+

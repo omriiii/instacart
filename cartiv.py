@@ -1,10 +1,10 @@
 
 import json
 import dbmanager
-from flask import Flask, session, request, render_template, flash, redirect
+from dbmanager import SQLiteRowToDict
+from flask import Flask, session, request, render_template, flash, redirect, send_from_directory, abort
 import time
 import utilities
-
 import notifier
 
 class Cartiv:
@@ -12,13 +12,15 @@ class Cartiv:
         self.config = self.__load_config(config_fname)
         self.app = self.__load_service()
         self.app.config['SECRET_KEY'] = 'super secret key'
+
         self.notifier = notifier.Notifier()
+        self.token_lookup = {}
 
         db = self.getDbManager()
-        db.init_db()
+        if db.get_tables_cnt() == 0:
+            db.init_db()
         db.con.close()
 
-        self.token_lookup = {}
 
     def getDbManager(self):
         return dbmanager.db(self.config["db_fname"])
@@ -34,33 +36,34 @@ class Cartiv:
     def __load_service(self):
         app = Flask("cartiv")
 
-        @app.route("/", methods=['GET'])
-        def index():
+        def getUser(session, token_optional=False):
             if 'session_token' in session:
-                #https://testdriven.io/blog/flask-sessions/
-
                 if session["session_token"] not in self.token_lookup:
                     del session["session_token"]
-                    return "Token doesn't exist. Please re-login", 500
+                    abort(401, "Session token doesn't exist. Please re-login.")
                 if (self.token_lookup[session["session_token"]][1]+86400 < time.time()):
                     del session["session_token"]
-                    return "Token expire. Please re-login", 500
+                    abort(401, "Session token expire. Please re-login.")
+                return self.token_lookup[session["session_token"]][0]
+            elif not token_optional: # token mandatory
+                abort(403, "No session token attached.")
 
-                """
-                db = self.getDbManager()
-                user = db.get_user_metedata(self.token_lookup[session["session_token"]][0])
-                db.con.close()
-                """
-                username = self.token_lookup[session["session_token"]][0]
+            return False
+
+
+        @app.route("/", methods=['GET'])
+        def index():
+            user = getUser(session, token_optional=True)
+            if user:
 
                 db = self.getDbManager()
-                user_groups = db.get_user_groups(username)
+                user_groups = db.getUsersGroups(user)
                 db.con.close()
 
                 if(len(user_groups) == 0):
-                    return render_template("groupless_app.html", display_name=username)
+                    return render_template("groupless_app.html", display_name=user)
 
-                return render_template("app.html", display_name=username)
+                return render_template("app.html", display_name=user)
 
             else: #home page here?
                 return "<a href=\"/register\">register</a> <a href=\"/login\">login</a>"
@@ -77,7 +80,7 @@ class Cartiv:
                 new_db = self.getDbManager()
 
                 if new_db.auth(username, password):
-                    #flash('Login successfully!', category = 'success')
+                    # Login succesful!!
                     session["session_token"] = utilities.make_random_string()
                     self.token_lookup[session["session_token"]] = (username, time.time())
                     return redirect("/")
@@ -105,10 +108,7 @@ class Cartiv:
                     #flash('Group created successfully!', category = 'success')
                     return redirect("/")
 
-            return render_template('groupless_app.html', display_name = username)
-            #print("make_group() called")
-            # Make Group Here!!
-            # Send packet back to user to refresh page
+                return render_template('groupless_app.html', display_name = username)
 
         @app.route("/join_group", methods = ['POST', 'GET'])
         def join_group():
@@ -127,11 +127,8 @@ class Cartiv:
                         flash('Joined Group successfully', category='success')
                         return redirect("/")
 
-            return render_template('groupless_app.html', display_name = username)
+            return render_template('groupless_app.html', display_name=username)
 
-            # print("join_group() called")
-            # Join Group Here!
-            # Send packet back to user to refresh page
 
         @app.route("/register", methods = ['POST', 'GET'])
         def register():
@@ -162,11 +159,51 @@ class Cartiv:
                     return redirect("/register")
 
             return render_template("register.html", boolean = True)
-        # Add "Update shopping list" post request endpoint here
+
+
+        @app.route("/groupsShoppingItems", methods = ['GET'])
+        def getShoppingItems():
+            user = getUser(session)
+
+            db = self.getDbManager()
+            user_group = db.getUsersGroups(user)
+            if len(user_group) == 0:
+                abort(403, "User has no group!")
+
+            gi = db.getGroupItems(user_group[0]["group_id"])
+            user_items = {d["id"]:d for d in gi}
+
+            for d in [dict(zip(d.keys(), d)) for d in db.getItemData(list(user_items.keys()))]:
+                user_items[d["id"]].update(d)
+
+            return json.dumps(list(user_items.values()))
+
+        @app.route("/addbleShoppingItems")
+        def getAddbleShoppingItems():
+            getUser(session) # Make sure a proper user is making this request!
+            return json.dumps([dict(l) for l in self.getDbManager().get_addble_shopping_times()])
+
+
+
+        @app.route("/addItemToList", methods = ['POST'])
+        def addItemToList():
+            user = getUser(session)
+            item_id = request.args.get('id')
+            # Verify the item the user wants to add exists !!
+            group_id = self.getDbManager().getUsersGroups(user)[0][0]
+            db = self.getDbManager()
+            if db.addItemToGroup(group_id, item_id):
+                return json.dumps(SQLiteRowToDict(db.getItemData(item_id)))
+            return "Failed to add item", 500
+
+
+        @app.route('/static/<path:path>')
+        def getStaticFile(path):
+            return send_from_directory('static', path)
 
         return app
 
     #
     #   Instantiate backend REST API
     def run(self):
-        self.app.run()
+        self.app.run(host="0.0.0.0")
