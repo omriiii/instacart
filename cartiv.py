@@ -55,22 +55,21 @@ class Cartiv:
         def index():
             user = getUser(session, token_optional=True)
             if user:
-
                 db = self.getDbManager()
                 user_groups = db.getUsersGroups(user)
+                user_groups_name = [d["group_name"] for d in db.getGroupsNames(user_groups)]
                 db.con.close()
+                return render_template("app.html", display_name=user, group_list=user_groups_name, group_exist=(len(user_groups) == 0))
+            else:
+                return render_template("home.html")
 
-                if(len(user_groups) == 0):
-                    return render_template("groupless_app.html", display_name=user)
-
-                return render_template("app.html", display_name=user)
-
-            else: #home page here?
-                return "<a href=\"/register\">register</a> <a href=\"/login\">login</a>"
+        @app.route("/home", methods=['GET'])
+        def home():
+            return render_template("home.html")
 
         @app.route("/about", methods = ['GET'])
         def about():
-            return "<h1>This is the about page!</h1>"
+            return render_template("about.html")
 
         @app.route("/login", methods = ['GET', 'POST'])
         def login():
@@ -88,49 +87,41 @@ class Cartiv:
                     flash('Login failed', category = 'error')
                     return redirect("/login")
             elif request.method == 'GET':
-                return render_template("login.html", boolean=True)
+                return render_template("login.html")
 
-        @app.route("/make_group", methods = ['POST'])
+        @app.route("/make_group", methods=['POST'])
         def make_group():
-            if request.method == 'POST':
-                group_name = request.form.get('group_name')
-                username = self.token_lookup[session["session_token"]][0]
-                new_db = self.getDbManager()
-                row = new_db.group_exists(group_name)
-                if row:
-                    flash('Group\'s name is already taken...', category='error')
-                elif not group_name:
-                    flash('Please fill in group\'s name fields', category='error')
-                elif len(group_name) < 4:
-                    flash('Group\'s name must be greater than 4 characters.', category='error')
-                else:
-                    new_db.make_group(group_name, username)
-                    #flash('Group created successfully!', category = 'success')
-                    return redirect("/")
+            user = getUser(session)
+            group_name = request.form.get('group_name')
+            db = self.getDbManager()
+            if not group_name:
+                flash('Please fill in group\'s name fields', category='error')
+            elif len(group_name) < 4:
+                flash('Group\'s name must be greater than 4 characters.', category='error')
+            else:
+                db.make_group(group_name, user)
+                flash('Group created successfully!', category='success')
 
-                return render_template('groupless_app.html', display_name = username)
+            return redirect("/")
 
-        @app.route("/join_group", methods = ['POST', 'GET'])
+        @app.route("/join_group", methods=['POST'])
         def join_group():
-            if request.method == 'POST':
-                group_id = request.form.get('group_id')
-                new_db = self.getDbManager()
-                username = self.token_lookup[session["session_token"]][0]
-                if not new_db.group_exists_by_id(group_id):
-                    flash('The group does not exist.', category='error')
-                else:
-                    if new_db.group_membership_exists(username, group_id):
-                        flash('You already in the group!', category = 'error')
+            user = getUser(session)
+            group_id = request.form.get('group_id')
+            db = self.getDbManager()
+            if not db.group_exists_by_id(group_id):
+                flash('The group does not exist.', category='error')
+            elif db.group_membership_exists(user, group_id):
+                flash('You are already in the group!', category='error')
+            else:
+                db.join_group(user, group_id)
+                flash('Joined Group successfully', category='success')
 
-                    else:
-                        new_db.join_group(username, group_id)
-                        flash('Joined Group successfully', category='success')
-                        return redirect("/")
-
-            return render_template('groupless_app.html', display_name=username)
+            return redirect("/")
 
 
-        @app.route("/register", methods = ['POST', 'GET'])
+
+        @app.route("/register", methods=['POST', 'GET'])
         def register():
             if request.method == 'POST':
                 firstName = request.form.get('firstName')
@@ -158,10 +149,10 @@ class Cartiv:
                     flash('Account created successfully!', category = 'success')
                     return redirect("/register")
 
-            return render_template("register.html", boolean = True)
+            return render_template("register.html")
 
 
-        @app.route("/groupsShoppingItems", methods = ['GET'])
+        @app.route("/groupsShoppingItems")
         def getShoppingItems():
             user = getUser(session)
 
@@ -170,7 +161,7 @@ class Cartiv:
             if len(user_group) == 0:
                 abort(403, "User has no group!")
 
-            gi = db.getGroupItems(user_group[0]["group_id"])
+            gi = db.getGroupItems(user_group[0])
             user_items = {d["id"]:d for d in gi}
 
             for d in [dict(zip(d.keys(), d)) for d in db.getItemData(list(user_items.keys()))]:
@@ -190,7 +181,7 @@ class Cartiv:
             user = getUser(session)
             item_id = request.args.get('id')
             # Verify the item the user wants to add exists !!
-            group_id = self.getDbManager().getUsersGroups(user)[0][0]
+            group_id = self.getDbManager().getUsersGroups(user)[0]
             db = self.getDbManager()
             if db.addItemToGroup(group_id, item_id):
                 return json.dumps(SQLiteRowToDict(db.getItemData(item_id)))
@@ -200,6 +191,27 @@ class Cartiv:
         @app.route('/static/<path:path>')
         def getStaticFile(path):
             return send_from_directory('static', path)
+
+        @app.route("/team", methods=['GET'])
+        def team():
+            return render_template("team.html")
+
+        """
+        # For future use when we'll allow users to access specific 
+        # groups they're a part of 
+        @app.route("/group/<group_name>", methods=['GET'])
+        def group(group_name):
+
+            # get items here and pass to render
+            db = self.getDbManager()
+
+            return render_template("group.html", boolean = True, display_group_name = group_name, items = "pass items here ")
+        """
+
+        @app.route("/logout")
+        def logout():
+            session.pop("session_token")
+            return redirect("/")
 
         return app
 

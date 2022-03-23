@@ -82,7 +82,11 @@ class db:
 
     def getUsersGroups(self, username):
         self.c.execute("SELECT group_id FROM group_membership WHERE username == ?", (username,))
-        return self.c.fetchall()
+        return [t["group_id"] for t in self.c.fetchall()]
+
+    def getGroupsNames(self, groups):
+        self.c.execute("SELECT group_id, group_name FROM groups WHERE group_id IN " + getSQLiteList(groups))
+        return [dict(zip(d.keys(), d)) for d in self.c.fetchall()]
 
     def get_users(self):
         self.c.execute("SELECT * FROM users")
@@ -114,10 +118,6 @@ class db:
     def group_exists_by_id(self, group_id):
         self.c.execute("SELECT * FROM groups WHERE group_id=?", (group_id,))
         return self.c.fetchone()
-
-    def count_groups(self):
-        self.c.execute("SELECT COUNT(*) FROM groups")
-        return self.c.fetchone()[0]
 
     def make_group(self, group_name, username):
         self.c.execute("INSERT INTO groups (group_name, pfp_url) VALUES (?,?)", (group_name, ""))
@@ -154,7 +154,6 @@ class db:
 
         self.c.execute("SELECT * FROM default_shopping_items WHERE id==" + item_id)
         return self.c.fetchone()
-
 
     def group_membership_exists(self, username, group_id):
         self.c.execute("SELECT * FROM group_membership WHERE username=? AND group_id=?", (username, group_id))
