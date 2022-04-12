@@ -141,11 +141,24 @@ class db:
         self.c.execute("SELECT count(*) FROM group_" + str(group_id) + "_items WHERE id==" + item_id)
         c = self.c.fetchone()[0]
         if(c == 0):
-            self.c.execute("INSERT INTO group_" + str(group_id) + "_items VALUES(?, ?, ?)", (item_id, 0, 1))
-        else:
-            self.c.execute("UPDATE group_" + str(group_id) + "_items SET quantity = quantity+1 WHERE id==" + item_id)
+            self.c.execute("INSERT INTO group_" + str(group_id) + "_items VALUES(?, ?, ?)", (item_id, 0, 0))
+
+        self.c.execute("UPDATE group_" + str(group_id) + "_items SET quantity = quantity+1 WHERE id==?", (item_id,))
         self.con.commit()
-        return True
+
+        self.c.execute("SELECT quantity FROM group_" + str(group_id) + "_items WHERE id==" + item_id)
+        return self.c.fetchone()[0]
+
+    def removeItemFromGroup(self, group_id, item_id):
+        self.c.execute("SELECT quantity FROM group_" + str(group_id) + "_items WHERE id==" + item_id)
+        c = self.c.fetchone()[0]
+        if(c < 2):
+            self.c.execute("DELETE FROM group_" + str(group_id) + "_items WHERE id==?", (item_id,))
+        else:
+            self.c.execute("UPDATE group_" + str(group_id) + "_items SET quantity = quantity-1 WHERE id==?", (item_id,))
+        self.con.commit()
+        return c-1
+
 
     def getItemData(self, item_id):
         if type(item_id) == list:

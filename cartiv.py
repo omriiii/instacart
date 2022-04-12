@@ -183,9 +183,27 @@ class Cartiv:
             # Verify the item the user wants to add exists !!
             group_id = self.getDbManager().getUsersGroups(user)[0]
             db = self.getDbManager()
-            if db.addItemToGroup(group_id, item_id):
-                return json.dumps(SQLiteRowToDict(db.getItemData(item_id)))
-            return "Failed to add item", 500
+            new_item_cnt = db.addItemToGroup(group_id, item_id)
+            ret = SQLiteRowToDict(db.getItemData(item_id))
+            ret["quantity"] = new_item_cnt
+            return json.dumps(ret)
+            #return "Failed to add item", 500
+
+
+        @app.route("/removeItemFromList", methods = ['POST'])
+        def removeItemFromList():
+            user = getUser(session)
+            item_id = request.args.get('id')
+            # Verify the item the user wants to remove exists !!
+            group_id = self.getDbManager().getUsersGroups(user)[0]
+            db = self.getDbManager()
+            new_item_cnt = db.removeItemFromGroup(group_id, item_id)
+            ret = SQLiteRowToDict(db.getItemData(item_id))
+            ret["quantity"] = new_item_cnt
+            return json.dumps(ret)
+            #return "Failed to remove item", 500
+
+
 
 
         @app.route('/static/<path:path>')
