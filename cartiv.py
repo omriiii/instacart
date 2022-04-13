@@ -65,11 +65,13 @@ class Cartiv:
 
         @app.route("/home", methods=['GET'])
         def home():
-            return render_template("home.html")
+            user = getUser(session, token_optional=True)
+            return render_template("home.html", display_name=user)
 
         @app.route("/about", methods = ['GET'])
         def about():
-            return render_template("about.html")
+            user = getUser(session, token_optional=True)
+            return render_template("about.html", display_name=user)
 
         @app.route("/login", methods = ['GET', 'POST'])
         def login():
@@ -212,7 +214,8 @@ class Cartiv:
 
         @app.route("/team", methods=['GET'])
         def team():
-            return render_template("team.html")
+            user = getUser(session, token_optional=True)
+            return render_template("team.html", display_name=user)
 
         """
         # For future use when we'll allow users to access specific 
@@ -236,4 +239,4 @@ class Cartiv:
     #
     #   Instantiate backend REST API
     def run(self):
-        self.app.run(host="0.0.0.0")
+        self.app.run()
