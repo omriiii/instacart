@@ -85,8 +85,14 @@ class db:
         return [t["group_id"] for t in self.c.fetchall()]
 
     def getGroupsNames(self, groups):
+        if isinstance(groups, str):
+            groups = [groups]
         self.c.execute("SELECT group_id, group_name FROM groups WHERE group_id IN " + getSQLiteList(groups))
         return [dict(zip(d.keys(), d)) for d in self.c.fetchall()]
+
+    def getGroupMembersData(self, group_id, keys=["username"]):
+        self.c.execute("SELECT " + ", ".join(keys) + " FROM users WHERE username IN (SELECT username FROM group_membership WHERE group_id==?)", (group_id,))
+        return self.c.fetchall()
 
     def get_users(self):
         self.c.execute("SELECT * FROM users")

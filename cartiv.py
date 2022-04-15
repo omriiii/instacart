@@ -57,9 +57,14 @@ class Cartiv:
             if user:
                 db = self.getDbManager()
                 user_groups = db.getUsersGroups(user)
-                user_groups_name = [d["group_name"] for d in db.getGroupsNames(user_groups)]
+                if(len(user_groups) == 0):
+                    db.con.close()
+                    return render_template("app.html", display_name=user)
+                user_group = user_groups[0]
+                group_name = db.getGroupsNames(user_group)[0]
+                group_members = db.getGroupMembersData(user_group, ["username", "pfp_url"])
                 db.con.close()
-                return render_template("app.html", display_name=user, group_list=user_groups_name, group_exist=(len(user_groups) == 0))
+                return render_template("app.html", display_name=user, group_name=group_name, group_members=group_members)
             else:
                 return render_template("home.html")
 
