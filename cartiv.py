@@ -6,6 +6,7 @@ from flask import Flask, session, request, render_template, flash, redirect, sen
 import time
 import utilities
 import notifier
+import pytumblr
 
 class Cartiv:
     def __init__(self, config_fname):
@@ -72,6 +73,33 @@ class Cartiv:
         def about():
             user = getUser(session, token_optional=True)
             return render_template("about.html", display_name=user)
+
+        @app.route("/blog", methods=['GET'])
+        def blog():
+            user = getUser(session, token_optional=True)
+            client = pytumblr.TumblrRestClient(
+                self.config["tumblr_keys"]["consumer_key"],
+                self.config["tumblr_keys"]["consumer_secret"],
+                self.config["tumblr_keys"]["oauth_token"],
+                self.config["tumblr_keys"]["oauth_secret"],
+            )
+            client.info()  # Grabs the current user information
+            tumblr_posts = client.posts('cartivblog', type='text', filter='text')
+            tumblr_posts = tumblr_posts.get("posts")
+
+            posts = []
+            for post in tumblr_posts:
+                item = {
+                    "title": post.get("title", ""),
+                    "text": post.get("body", ""),
+                    "url": post.get("post_url", "")
+                }
+                print(item)
+                posts.append(item)
+            print(posts)
+            return posts
+            #return render_template("blog.html", posts, display_name=user)
+            #return render_template("blog.html", display_name=user)
 
         @app.route("/login", methods = ['GET', 'POST'])
         def login():

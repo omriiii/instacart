@@ -1,0 +1,36 @@
+{% extends "template.html" %} {% block title %}Blog{% endblock %}
+
+{% block account_handler %}
+{% if display_name%}
+    <ul>
+      <div class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Account
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="#">Your profile</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#">Settings</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="/logout">Sign out</a>
+        </div>
+      </div>
+  </ul>
+    {% else %}
+    <a class="nav-link" href="/login">Log in</a>
+    <a class="nav-link" href="/register">Sign up</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+    <h3 align="center">This is the Blog page</h3>
+    <div>
+{#        {% for post in posts %}#}
+{#            {% for title, text, url in post.items() %}#}
+                <p> {{ posts }} </p>
+{#                <p> {{ text }} </p>#}
+{#                <p> {{ url }} </p>#}
+{#            {% endfor %}#}
+{#        {% endfor %}#}
+    </div>
+{% endblock %}
