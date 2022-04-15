@@ -85,6 +85,8 @@ class db:
         return [t["group_id"] for t in self.c.fetchall()]
 
     def getGroupsNames(self, groups):
+        if isinstance(groups, int):
+            groups = str(groups)
         if isinstance(groups, str):
             groups = [groups]
         self.c.execute("SELECT group_id, group_name FROM groups WHERE group_id IN " + getSQLiteList(groups))

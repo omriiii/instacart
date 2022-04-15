@@ -33,3 +33,9 @@
 	  right: 8px;
 	  font-size: 18px;
 	}
+
+    .tumblr_post
+    {
+        border-bottom: solid 1.5px;
+        margin-bottom: 10px;
+    }

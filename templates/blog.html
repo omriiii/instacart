@@ -1,4 +1,5 @@
-{% extends "template.html" %} {% block title %}Team{% endblock %}
+{% extends "template.html" %} {% block title %}Blog{% endblock %}
+
 {% block account_handler %}
 {% if display_name%}
     <ul>
@@ -22,6 +23,14 @@
 {% endblock %}
 
 {% block content %}
-    <h3 align="center">Our team</h3>
+    <h3 align="center">This is the Blog page</h3>
+    <div>
+        {% for post in posts %}
+        <div class="tumblr_post">
+            <h2> {{ post["title"] }} </h2>
+            <p> {{ post["text"] }} </p>
+            <a href="{{ post['url'] }}">Link to original post</a>
+        </div>
+        {% endfor %}
+    </div>
 {% endblock %}
-<!--see: https://www.w3schools.com/howto/howto_css_team.asp-->

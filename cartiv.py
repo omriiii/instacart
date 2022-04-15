@@ -6,6 +6,7 @@ from flask import Flask, session, request, render_template, flash, redirect, sen
 import time
 import utilities
 import notifier
+import pytumblr
 
 class Cartiv:
     def __init__(self, config_fname):
@@ -61,7 +62,7 @@ class Cartiv:
                     db.con.close()
                     return render_template("app.html", display_name=user)
                 user_group = user_groups[0]
-                group_name = db.getGroupsNames(user_group)[0]
+                group_name = db.getGroupsNames(user_group)[0]["group_name"]
                 group_members = db.getGroupMembersData(user_group, ["username", "pfp_url"])
                 db.con.close()
                 return render_template("app.html", display_name=user, group_name=group_name, group_members=group_members)
@@ -70,11 +71,40 @@ class Cartiv:
 
         @app.route("/home", methods=['GET'])
         def home():
-            return render_template("home.html")
+            user = getUser(session, token_optional=True)
+            return render_template("home.html", display_name=user)
 
         @app.route("/about", methods = ['GET'])
         def about():
-            return render_template("about.html")
+            user = getUser(session, token_optional=True)
+            return render_template("about.html", display_name=user)
+
+        @app.route("/blog", methods=['GET'])
+        def blog():
+            user = getUser(session, token_optional=True)
+            client = pytumblr.TumblrRestClient(
+                self.config["tumblr_keys"]["consumer_key"],
+                self.config["tumblr_keys"]["consumer_secret"],
+                self.config["tumblr_keys"]["oauth_token"],
+                self.config["tumblr_keys"]["oauth_secret"],
+            )
+            client.info()  # Grabs the current user information
+            tumblr_posts = client.posts('cartivblog', type='text', filter='text')
+            tumblr_posts = tumblr_posts.get("posts")
+
+            posts = []
+            for post in tumblr_posts:
+                item = {
+                    "title": post.get("title", ""),
+                    "text": post.get("body", ""),
+                    "url": post.get("post_url", "")
+                }
+                print(item)
+                posts.append(item)
+            print(posts)
+            #return posts
+            return render_template("blog.html", display_name=user, posts=posts)
+            #return render_template("blog.html", display_name=user)
 
         @app.route("/login", methods = ['GET', 'POST'])
         def login():
@@ -217,7 +247,8 @@ class Cartiv:
 
         @app.route("/team", methods=['GET'])
         def team():
-            return render_template("team.html")
+            user = getUser(session, token_optional=True)
+            return render_template("team.html", display_name=user)
 
         """
         # For future use when we'll allow users to access specific 
@@ -241,4 +272,4 @@ class Cartiv:
     #
     #   Instantiate backend REST API
     def run(self):
-        self.app.run(host="0.0.0.0")
+        self.app.run()
