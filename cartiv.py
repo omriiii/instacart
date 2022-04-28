@@ -13,7 +13,6 @@ class Cartiv:
         self.config = self.__load_config(config_fname)
         self.app = self.__load_service()
         self.app.config['SECRET_KEY'] = 'super secret key'
-
         self.notifier = notifier.Notifier()
         self.token_lookup = {}
 
@@ -64,8 +63,11 @@ class Cartiv:
                 user_group = user_groups[0]
                 group_name = db.getGroupsNames(user_group)[0]["group_name"]
                 group_members = db.getGroupMembersData(user_group, ["username", "pfp_url"])
+                for user in group_members:
+                    if user["pfp_url"] is None:
+                        user["pfp_url"] = "/static/default_pfp.png"
                 db.con.close()
-                return render_template("app.html", display_name=user, group_name=group_name, group_members=group_members)
+                return render_template("app.html", display_name=user, group_id=user_group, group_name=group_name, group_members=group_members)
             else:
                 return render_template("home.html")
 
@@ -165,6 +167,8 @@ class Cartiv:
                 password1 = request.form.get('password1')
                 password2 = request.form.get('password2')
                 email = request.form.get('email')
+                phone_number = request.form.get('phone_number')
+                phone_provider = request.form.get('phone_provider')
                 db = self.getDbManager()
                 row = db.user_exists(username)
                 if row is not None:
@@ -180,7 +184,7 @@ class Cartiv:
                 elif len(password1) < 7:
                     flash('Password must be at least 7 characters.', category = 'error')
                 else:
-                    db.add_user(username, firstName, lastName, password1, email)
+                    db.add_user(username, firstName, lastName, password1, email, phone_number, phone_provider)
                     flash('Account created successfully!', category = 'success')
                     return redirect("/register")
 
@@ -238,7 +242,17 @@ class Cartiv:
             return json.dumps(ret)
             #return "Failed to remove item", 500
 
-
+        @app.route("/notifyUsers", methods = ['POST'])
+        def notifyUsers():
+            user = getUser(session)
+            group_id = self.getDbManager().getUsersGroups(user)[0]
+            db = self.getDbManager()
+            group_members_phone_numbers = db.getGroupMembersData(group_id, ["username", "phone_number", "phone_provider"])
+            for member in group_members_phone_numbers:
+                if member["username"] != user:
+                    self.notifier.notify(member["phone_number"], member["phone_provider"], user+" is going shopping! Please update the cart with items you want them to purhcase!")
+            flash('Notified other group members successfuly!', category = 'success')
+            return "OK"
 
 
         @app.route('/static/<path:path>')

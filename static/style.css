@@ -34,6 +34,20 @@
 	  font-size: 18px;
 	}
 
+    .user_pfp
+    {
+        height: 40px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .user_username
+    {
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+
     .tumblr_post
     {
         border-bottom: solid 1.5px;

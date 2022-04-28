@@ -33,6 +33,8 @@ class db:
                             email                      TEXT NOT NULL,
                             firstName                  TEXT NOT NULL, 
                             lastName                   TEXT NOT NULL,
+                            phone_number               TEXT NOT NULL,
+                            phone_provider             TEXT NOT NULL,
                             pfp_url                    TEXT);''')
 
         self.c.execute(''' CREATE TABLE groups(
@@ -70,10 +72,11 @@ class db:
     def hash(self, s):
         return hashlib.sha512(s.encode()).hexdigest()
 
-    def add_user(self, username, firstName, lastName, password, email):
+    def add_user(self, username, firstName, lastName, password, email, phone_number, phone_provider):
         salt = utilities.make_random_string()
         salted_hashed_password = self.hash(password + salt)
-        self.c.execute("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?)", (username, salted_hashed_password, salt, email, firstName, lastName, ""))
+        self.c.execute("INSERT INTO users (username, salted_hashed_password, salt, email, firstName, lastName, phone_number, phone_provider) VALUES "
+                       "(?, ?, ?, ?, ?, ?, ?, ?)", (username, salted_hashed_password, salt, email, firstName, lastName, phone_number, phone_provider))
         self.con.commit()
 
     def get_user_metedata(self, username):
@@ -94,7 +97,7 @@ class db:
 
     def getGroupMembersData(self, group_id, keys=["username"]):
         self.c.execute("SELECT " + ", ".join(keys) + " FROM users WHERE username IN (SELECT username FROM group_membership WHERE group_id==?)", (group_id,))
-        return self.c.fetchall()
+        return [{k: t[k] for k in keys} for t in self.c.fetchall()]
 
     def get_users(self):
         self.c.execute("SELECT * FROM users")

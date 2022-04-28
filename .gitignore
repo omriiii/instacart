@@ -4,3 +4,6 @@ venvnew
 data.db
 config.json
 venv
+credentials.json
+token.json
+token files
