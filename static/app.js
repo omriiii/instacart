@@ -7,6 +7,8 @@ function getGroupItemDiv(id)
     return group_items_div.getElementsByClassName("item_"+id)[0];
 }
 
+
+
 function addItemToList(id)
 {
     fetch("/addItemToList?id=" + id, { method: 'POST', body: id }).then(function(response) { return response.json(); }).then(

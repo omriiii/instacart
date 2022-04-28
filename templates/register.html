@@ -35,36 +35,48 @@
       </div>
     {% endif %} {% endfor %} {% endif %} {% endwith %}
 <body>
-<div class="container">
-<form method="POST">
-    <a href="/" text-align:center;>Cartiv</a> <!--This will replace with logo-->
-  <h3 align="center">Create your Cartiv Account</h3>
-  <div class="form-group">
-    <label for="firstName">First Name</label>
-    <input type="text" class="form-control" id="firstName" name="firstName" placeholder="Enter first name">
-    <label for="lastName">Last Name</label>
-    <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Enter last name">
-  </div>
-  <div class="form-group">
-    <label for="username">Username</label>
-    <input type="username" class="form-control" id="username" name="username" placeholder="Enter username" required>
-  </div>
-  <div class="form-group">
-    <label for="password1">Password</label>
-    <input type="password" class="form-control" id="password1" name="password1" placeholder="Enter password" required>
-  </div>
-  <div class="form-group">
-    <label for="password2">Password (Confirm)</label>
-    <input type="password" class="form-control"  id="password2" name="password2" placeholder="Confirm password" required>
-  </div>
-  <div class="form-group">
-    <label for="email">Email</label>
-    <input type="email" class="form-control" id="email" name="email" placeholder="Enter email" required>
-  </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
-  <br />
-  <p>Already have an account? <a href="/login">Login instead</a>.</p>
+    <div class="container">
+        <form method="POST">
+            <a href="/" style="text-align:center;">Cartiv</a> <!--This will replace with logo-->
+            <h3 align="center">Create your Cartiv Account</h3>
+            <div class="form-group">
+                <label for="firstName">First Name</label>
+                <input type="text" class="form-control" id="firstName" name="firstName" placeholder="Enter first name">
+                <label for="lastName">Last Name</label>
+                <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Enter last name">
+            </div>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="username" class="form-control" id="username" name="username" placeholder="Enter username" required>
+            </div>
+            <div class="form-group">
+                <label for="password1">Password</label>
+                <input type="password" class="form-control" id="password1" name="password1" placeholder="Enter password" required>
+            </div>
+            <div class="form-group">
+                <label for="password2">Password (Confirm)</label>
+                <input type="password" class="form-control"  id="password2" name="password2" placeholder="Confirm password" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="Enter email" required>
+            </div>
+            <div class="form-group">
+                <label for="phone_number">phone_number</label>
+                <input type="phone_number" class="form-control" id="phone_number" name="phone_number" placeholder="Enter phone_number" required>
+            </div>
+            <div class="form-group">
+                <label for="phone_provider">Phone Provider</label>
+                <select name="phone_provider" id="phone_provider" class="form-control">
+                    <option value="verizon">Verizon</option>
+                    <option value="at&t">AT&T</option>
+                    <option value="sprint">Sprint</option>
+                </select>
+            </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        <br />
+        <p>Already have an account? <a href="/login">Login instead</a>.</p>
 </div>
 <script
       src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
