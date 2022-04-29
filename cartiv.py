@@ -101,12 +101,8 @@ class Cartiv:
                     "text": post.get("body", ""),
                     "url": post.get("post_url", "")
                 }
-                print(item)
                 posts.append(item)
-            print(posts)
-            #return posts
             return render_template("blog.html", display_name=user, posts=posts)
-            #return render_template("blog.html", display_name=user)
 
         @app.route("/login", methods = ['GET', 'POST'])
         def login():
