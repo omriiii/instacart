@@ -58,16 +58,6 @@
 		box-shadow: 12px 12px 2px 1px rgba(113, 204, 88, .2);
     }
 
-	.post_title
-	{
-
-	}
-
-	.post_text
-	{
-
-	}
-
 	.post_link
 	{
 		margin-bottom: 10px;
@@ -119,4 +109,9 @@
 	.team_page
 	{
 		margin-top: 40px;
+	}
+
+	.about_subheading
+	{
+		font-size: 20px;
 	}
