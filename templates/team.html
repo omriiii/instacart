@@ -14,7 +14,7 @@
           <a class="dropdown-item" href="/logout">Sign out</a>
         </div>
       </div>
-  </ul>
+    </ul>
     {% else %}
     <a class="nav-link" href="/login">Log in</a>
     <a class="nav-link" href="/register">Sign up</a>
@@ -22,6 +22,43 @@
 {% endblock %}
 
 {% block content %}
-    <h3 align="center">Our team</h3>
+    <h3 align="center" style="margin-top: 40px">Learn more about our team!</h3>
+    <article class="team_page">
+        <div class="dev_profile">
+            <img class="dev_image pull-left" src="https://cdn.discordapp.com/attachments/938257456478449695/969711811660251246/IMG_8789.jpg" alt="Omri looking dramatic in front of a rose bush.">
+            <div class="dev_blurb">
+                <h3 class="dev_name">Omri Gideoni</h3>
+                <p class="dev_desc">Hi! I'm senior at SJSU (graduating this spring).
+                    I have internship experience, however this was my first real full-stack project ever!
+                    I love drinking coffee, sleeping, taking long showers, baking, and perfumes.
+                    I hope to continue working on this project after the school year is over and
+                    integrate it into my family's grocery shopping routines.</p>
+            </div>
+        </div>
+
+        <div class="dev_profile">
+            <img class="dev_image pull-left" src="https://cdn.discordapp.com/attachments/938255502075379752/971181763734933504/jessie.jpeg" alt="Jessie smiling at her birthday dinner.">
+            <div class="dev_blurb">
+                <h3 class="dev_name">Jessie Lyu</h3>
+                <p class="dev_desc">Hi! I'm junior at SJSU. I had multiple side projects before.
+                    However, this was my first real full-stack project ever too!
+                    I love working out, playing basketball, and listening to music.
+                    Also, I'm interested in cryptocurrency.
+                    I hope our team can still work on this project after the end of the semester and make it more incredible!</p>
+            </div>
+        </div>
+
+        <div class="dev_profile">
+            <img class="dev_image pull-left" src="https://cdn.discordapp.com/attachments/858414443452825625/971154319879585812/IMG_0795_2.PNG" alt="Neeha smiling in front of a tree.">
+            <div class="dev_blurb">
+                <h3 class="dev_name">Neeha Kandikattu</h3>
+                <p class="dev_desc">I'm a junior (rising senior) at SJSU majoring in Computer Science.
+                    I'm very excited that this is my first full-stack project,
+                    and the first project that I have done front-end work on.
+                    I love digital art, painting, writing fiction, baking, cooking, and swimming.
+                    I'm very proud of the product we've made, and I've learned a lot!</p>
+            </div>
+        </div>
+    </article>
 {% endblock %}
 <!--see: https://www.w3schools.com/howto/howto_css_team.asp-->

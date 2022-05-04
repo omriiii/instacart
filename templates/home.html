@@ -23,6 +23,24 @@
 {% endblock %}
 
 {% block content %}
-    <h3 align="center">This is the Home page</h3>
+
+    <style>
+        body
+        {
+            background-image: url("static/home_bg.jpg");
+        }
+    </style>
+
+    <h1 style="font-size: 196px; margin-top: 100px;">Cartiv</h1>
+    <p style="font-size: 32px;">The first collaborative shopping cart.</p>
+    <p style="font-size: 20px;">Cartiv makes shopping for your family or roommates simple. Each member of your household
+        can add whatever items they want to a shared grocery list so that you don’t have to juggle all their requests.
+        When you’re ready to go grocery shopping, you can notify your family or roommates through the app so they have
+        time to include last-minute additions to your shared cart.
+    </p>
+    <p style="font-size: 20px;"><strong>Stop fielding half-composed lists in your phone’s Notes app when Cartiv can handle your family’s shopping needs!</strong></p>
+
+    <button type="button" class="btn btn-warning"><a href="register">Join Cartiv!</a></button>
+
 {% endblock %}
 
