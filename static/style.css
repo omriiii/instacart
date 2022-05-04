@@ -50,19 +50,13 @@
 
     .tumblr_post
     {
-        border-bottom: solid 1.5px;
-        margin-bottom: 30px;
+        /*border-bottom: solid 1.5px;*/
+		padding: 10px;
+		padding-top: 20px;
+		border: solid 1px;
+		margin-bottom: 30px;
+		box-shadow: 12px 12px 2px 1px rgba(113, 204, 88, .2);
     }
-
-	.post_title
-	{
-
-	}
-
-	.post_text
-	{
-
-	}
 
 	.post_link
 	{
@@ -115,4 +109,9 @@
 	.team_page
 	{
 		margin-top: 40px;
+	}
+
+	.about_subheading
+	{
+		font-size: 20px;
 	}
