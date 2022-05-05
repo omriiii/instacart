@@ -28,21 +28,41 @@
     <p>Hello {{ display_name }}!</p>
 
     <p>You currently do not have a group. Please either make one or join one!</p>
-    <form action="/make_group" method="post">
-        <h3>Make a group</h3>
-        <div class="form-group">
-            <label for="group_name">Group Name</label>
-            <input type="text" id="group_name" name="group_name" placeholder="{{ display_name }}'s Group">
-            <button type="submit" value="Submit!">Make Group</button>
-        </div>
-    </form>
+    <style>
+        .option_wrapper
+        {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 0 10px 0 10px;
+        }
 
-    <form action="/join_group" method="post">
-        <h3>Join a group</h3>
-        <label for="group_id">Group Id</label>
-        <input type="number" id="group_id" name="group_id">
-        <button type="submit" value="Submit!">Join A Group</button>
-    </form>
+    </style>
+      <div class="row">
+        <div class="col-md option_wrapper" style="text-align: center;">
+            <form action="/make_group" method="post">
+                <h3>Make a group</h3>
+                <div class="form-group">
+                    <label for="group_name">Group Name</label>
+                    <input type="text" class="form-control" id="group_name" name="group_name" placeholder="{{ display_name }}'s Group">
+                    <button type="submit" class="btn btn-primary" style="margin-top: 6px" value="Submit!">Make New Group</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md option_wrapper" style="text-align: center;">
+            <form action="/join_group" method="post">
+                <h3>Join a group</h3>
+                <label for="group_id">Group Id</label>
+                <input type="number" class="form-control" id="group_id" name="group_id">
+                <button type="submit" class="btn btn-primary" style="margin-top: 6px" value="Submit!">Join Group</button>
+            </form>
+        </div>
+      </div>
+
+
 
     {% else %}
     <p>
@@ -70,6 +90,15 @@
 
     <script type="text/javascript" src="/static/app.js"></script>
 
+    <script>
+        window.onload = function()
+        {
+            document.getElementById('notifyUsersButton').onclick = function() {
+                fetch("/notifyUsers", {method: 'POST'})
+            }
+        }
+    </script>
+
     <!---
     <table>
     <thead>
@@ -88,16 +117,9 @@
     </table>
     <br /> <br/>
     <a href="/make_group">Add groups</a>
-    {% endif %}
     -->
-<script>
 
-    window.onload = function()
-    {
-        document.getElementById('notifyUsersButton').onclick = function() {
-            fetch("/notifyUsers", {method: 'POST'})
-        }
-    }
-</script>
+
+    {% endif %}
 
 {% endblock %}

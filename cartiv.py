@@ -9,7 +9,7 @@ import notifier
 import pytumblr
 
 class Cartiv:
-    def __init__(self, config_fname):
+    def __init__(self, config_fname, before_first_req_func=None):
         self.config = self.__load_config(config_fname)
         self.app = self.__load_service()
         self.app.config['SECRET_KEY'] = 'super secret key'
@@ -20,6 +20,8 @@ class Cartiv:
         if db.get_tables_cnt() == 0:
             db.init_db()
         db.con.close()
+
+        self.before_first_req_func = before_first_req_func
 
 
     def getDbManager(self):
@@ -35,6 +37,11 @@ class Cartiv:
     #   Load in the backend REST API
     def __load_service(self):
         app = Flask("cartiv")
+
+        @app.before_first_request
+        def before_first_request():
+            if self.before_first_req_func is not None:
+                self.before_first_req_func()
 
         def getUser(session, token_optional=False):
             if 'session_token' in session:
@@ -277,7 +284,9 @@ class Cartiv:
             session.pop("session_token")
             return redirect("/")
 
+
         return app
+
 
     #
     #   Instantiate backend REST API
